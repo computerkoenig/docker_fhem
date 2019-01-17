@@ -1,0 +1,51 @@
+main:
+  restart: always
+  build: ./fhem_main
+  volumes:
+    - ./fhem_main/data:/opt/fhem
+    - ./fhem_main/log:/log
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+  ports:
+     - "8083:8083" #PC Web + Dashboard + Mobile
+     - "7072:7072" #FHEM2FHEM
+     - "3030:3030" #Firmata Server Port
+     - "8090:8090" #AMAD Port
+  links:
+     - mqtt
+     - collectord
+
+mqtt:
+   restart: always
+   image: toke/mosquitto:latest
+   volumes:
+     - ./mqtt/config:/mqtt/config:ro
+     - ./mqtt/log:/mqtt/log
+     - ./mqtt/data:/mqtt/data
+     - "/etc/timezone:/etc/timezone:ro"
+     - "/etc/localtime:/etc/localtime:ro"
+   ports:
+     - "1883:1883"
+     - "9001:9001" #Web Port
+
+collectord:
+  restart: always
+  build: ./collectord
+  volumes:
+    - ./collectord/config:/etc/collectord:ro
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+#  ports: #Von aussen muss keiner auf den collectord
+#     - "5222:5222"
+
+alexa:
+  restart: always
+  build: ./alexa
+  volumes:
+    - ./alexa/data:/root/.alexa
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+  ports:
+    - "3000:3000"
+  links:
+    - main
