@@ -2,9 +2,11 @@ FROM fhem/fhem:latest
 MAINTAINER Michael Schaefer
 
 RUN apt-get update && apt-get -y upgrade \
-&& apt-get -y install wget ca-certificates apt-transport-https sudo make curl ssh telnet supervisor
+&& apt-get -y install wget ca-certificates apt-transport-https sudo make curl ssh telnet git-core build-essential openssl libssl-dev
 
-#RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+# NodeJS
+RUN curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
+RUN apt-get install -y nodejs
 
 # Install perl packages
 RUN apt-get -y install libalgorithm-merge-perl \
@@ -32,8 +34,11 @@ libdatetime-format-strptime-perl \
 libio-socket-ssl-perl \
 libsoap-lite-perl \
 nodejs \
-init
-
+init \
+python \
+g++ \
+libavahi-compat-libdnssd-dev \
+nodejs
 
 #Install other FHEM Tools
 RUN apt-get -y install sendmail-bin etherwake python-pip && \
@@ -58,7 +63,10 @@ RUN pip install speedtest-cli
 ## Install sipcmd - Telefonclient für die Fritzbox
 #RUN apt-get -y install libopal-dev libpt-dev
 
-RUN echo Europe/Berlin > /etc/timezone && dpkg-reconfigure tzdata
+#Alexa
+RUN npm install -g alexa-fhem
+
+RUN ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 
 VOLUME ["/opt/fhem"]
 EXPOSE 8083

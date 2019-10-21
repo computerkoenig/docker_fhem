@@ -1,6 +1,6 @@
 main:
   restart: always
-  build: ./fhem_main
+  image: computerkoenig/fhem_main:v3.1
   volumes:
     - ./fhem_main/data:/opt/fhem
     - ./fhem_main/log:/log
@@ -17,7 +17,7 @@ main:
 
 mqtt:
    restart: always
-   image: toke/mosquitto:latest
+   image: eclipse-mosquitto:latest
    volumes:
      - ./mqtt/config:/mqtt/config:ro
      - ./mqtt/log:/mqtt/log
@@ -30,22 +30,63 @@ mqtt:
 
 collectord:
   restart: always
-  build: ./collectord
+  image: computerkoenig/fhem_collectord:v1.8.1-r5
   volumes:
     - ./collectord/config:/etc/collectord:ro
     - "/etc/timezone:/etc/timezone:ro"
     - "/etc/localtime:/etc/localtime:ro"
-#  ports: #Von aussen muss keiner auf den collectord
-#     - "5222:5222"
 
 alexa:
   restart: always
-  build: ./alexa
+  image: computerkoenig/fhem_alexa:v0.4.4-r5
   volumes:
     - ./alexa/data:/root/.alexa
+    - ./alexa/log:/log
     - "/etc/timezone:/etc/timezone:ro"
     - "/etc/localtime:/etc/localtime:ro"
   ports:
     - "3000:3000"
+  links:
+    - main
+
+tasmotaadmin:
+  restart: always
+  image: raymondmm/tasmoadmin:latest
+  volumes:
+    - ./tasmotaadmin/data:/data
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+  ports:
+    - "8081:80"
+
+tasmocompiler:
+  restart: always
+  image: benzino77/tasmocompiler:latest
+  ports:
+    - "8082:3000"
+
+homebridge:
+  restart: always
+  image: computerkoenig/fhem_homebridge:v0.5
+  volumes:
+    - ./homebridge/config:/root/.homebridge
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+  ports:
+          - "51826:51826"
+          - "8282:8282"
+  links:
+    - main
+
+ssl_proxy:
+  restart: always
+  image: computerkoenig/ssl_reverseproxy:v0.9
+  volumes:
+    - ./ssl_proxy/config:/etc/nginx/conf.d:ro
+    - ./ssl_proxy/certfiles:/certfiles:ro
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+  ports:
+    - "8483:443"
   links:
     - main
