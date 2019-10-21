@@ -1,3 +1,3 @@
 #!/bin/bash
 sleep 30
-/opt/alexa-fhem/bin/alexa
+/usr/bin/alexa-fhem -D --dockerDetached
