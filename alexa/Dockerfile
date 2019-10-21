@@ -10,17 +10,23 @@ libssl-dev \
 python \
 g++ \
 libavahi-compat-libdnssd-dev \
-curl
+curl \
+ssh \
+netcat
 
 # NodeJS
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get -y install nodejs 
+RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
+RUN apt-get -y install nodejs
 
-COPY ./etc/alexa-fhem.tgz /opt/alexa-fhem.tgz
+RUN npm install -g alexa-fhem
 
-RUN cd /opt/ && tar -xzf alexa-fhem.tgz && mv package alexa-fhem && cd alexa-fhem && npm i npm@latest -g && npm install && mkdir /root/.alexa
+RUN mkdir /root/.alexa && mkdir /opt/alexa
 
-COPY ./etc/startup.sh /opt/alexa-fhem/startup.sh
+COPY ./etc/startup.sh /opt/alexa/startup.sh
+
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=3 CMD nc -z 127.0.0.1 3000 || exit 1
 
 EXPOSE 3000
-CMD ["/opt/alexa-fhem/startup.sh"]
+# CMD ["/bin/bash"]
+# CMD ["/usr/bin/alexa-fhem"]
+CMD ["/opt/alexa/startup.sh"]
