@@ -3,15 +3,12 @@ MAINTAINER Michael Schaefer
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get -y install wget apt-transport-https sudo dpkg perl perl-modules netcat
+RUN apt-get update && apt-get upgrade -y \
+&& apt-get -y install wget apt-transport-https sudo dpkg perl perl-modules netcat supervisor
 
 # Get collectord and install
 RUN wget https://svn.fhem.de/trac/export/HEAD/trunk/fhem/contrib/PRESENCE/deb/collectord-1.8.1.deb && \
 dpkg -i collectord-1.8.1.deb
-
-RUN apt-get update
-RUN apt-get -y install supervisor
 
 RUN mkdir -p /var/log/supervisor && \
 mkdir /etc/collectord

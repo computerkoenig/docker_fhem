@@ -2,30 +2,20 @@ FROM fhem/fhem:latest
 MAINTAINER Michael Schaefer
 
 RUN apt-get update && apt-get -y upgrade \
-&& apt-get -y install wget ca-certificates apt-transport-https sudo make curl ssh telnet git-core build-essential openssl libssl-dev
-
-# NodeJS
-RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
-  && case "${dpkgArch##*-}" in \
-    amd64) ARCH='amd64';; \
-    arm64) ARCH='arm64';; \
-    armhf) ARCH='armv7l';; \
-    *) echo "unsupported architecture"; exit 1 ;; \
-  esac \
-  && if [ "$ARCH" = "amd64" ]; then \
-    curl -sL https://deb.nodesource.com/setup_12.x | bash - \
-    && apt-get install -y nodejs ; fi \
-  && if [ "$ARCH" = "arm64" ]; then \
-    wget https://nodejs.org/dist/v12.12.0/node-v12.12.0-linux-arm64.tar.xz \
-    && tar -xvf node-v12.12.0-linux-arm64.tar.xz \
-    && cp -R node-v12.12.0-linux-arm64/* /usr/local/ ; fi \
-  && if [ "$ARCH" = "armv7l" ]; then \
-    wget https://nodejs.org/dist/v12.12.0/node-v12.12.0-linux-armv7l.tar.xz \
-    && tar -xvf node-v12.12.0-linux-armv7l.tar.xz \
-    && cp -R node-v12.12.0-linux-armv7l/* /usr/local/ ; fi
-
-# Install perl packages
-RUN apt-get -y install libalgorithm-merge-perl \
+&& apt-get -y install \
+wget \
+ca-certificates \
+apt-transport-https \
+sudo \
+make \
+curl \
+ssh \
+telnet \
+git-core \
+build-essential \
+openssl \
+libssl-dev \
+libalgorithm-merge-perl \
 libclass-isa-perl \
 libcommon-sense-perl \
 libdpkg-perl \
@@ -54,6 +44,26 @@ init \
 python \
 g++ \
 libavahi-compat-libdnssd-dev
+
+# NodeJS
+RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
+  && case "${dpkgArch##*-}" in \
+    amd64) ARCH='amd64';; \
+    arm64) ARCH='arm64';; \
+    armhf) ARCH='armv7l';; \
+    *) echo "unsupported architecture"; exit 1 ;; \
+  esac \
+  && if [ "$ARCH" = "amd64" ]; then \
+    curl -sL https://deb.nodesource.com/setup_12.x | bash - \
+    && apt-get install -y nodejs ; fi \
+  && if [ "$ARCH" = "arm64" ]; then \
+    wget https://nodejs.org/dist/v12.12.0/node-v12.12.0-linux-arm64.tar.xz \
+    && tar -xvf node-v12.12.0-linux-arm64.tar.xz \
+    && cp -R node-v12.12.0-linux-arm64/* /usr/local/ ; fi \
+  && if [ "$ARCH" = "armv7l" ]; then \
+    wget https://nodejs.org/dist/v12.12.0/node-v12.12.0-linux-armv7l.tar.xz \
+    && tar -xvf node-v12.12.0-linux-armv7l.tar.xz \
+    && cp -R node-v12.12.0-linux-armv7l/* /usr/local/ ; fi
 
 #Install other FHEM Tools
 RUN apt-get -y install sendmail-bin etherwake python-pip && \
