@@ -53,8 +53,7 @@ nodejs \
 init \
 python \
 g++ \
-libavahi-compat-libdnssd-dev \
-nodejs
+libavahi-compat-libdnssd-dev
 
 #Install other FHEM Tools
 RUN apt-get -y install sendmail-bin etherwake python-pip && \
@@ -70,8 +69,8 @@ cpanm HTML::Parse && \
 cpanm Data::Dumper && \
 cpanm MIME::Base64 && \
 cpanm Module::Pluggable && \
-cpanm Net::SIP
-#cpanm WWW::Jawbone::Up
+cpanm Net::SIP \
+cpanm WWW::Jawbone::Up
 
 # Speedtest tool
 RUN pip install speedtest-cli
