@@ -69,8 +69,8 @@ cpanm HTML::Parse && \
 cpanm Data::Dumper && \
 cpanm MIME::Base64 && \
 cpanm Module::Pluggable && \
-cpanm Net::SIP \
-cpanm WWW::Jawbone::Up
+cpanm Net::SIP
+#cpanm WWW::Jawbone::Up
 
 # Speedtest tool
 RUN pip install speedtest-cli
