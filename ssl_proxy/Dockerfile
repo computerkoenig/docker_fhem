@@ -1,7 +1,7 @@
 FROM nginx:stable
 MAINTAINER Michael Schäfer
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl nginx-extras
 
 RUN mkdir -p /etc/ssl/nginx \
 && mkdir /log
