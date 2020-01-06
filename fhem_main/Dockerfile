@@ -43,7 +43,8 @@ nodejs \
 init \
 python \
 g++ \
-libavahi-compat-libdnssd-dev
+libavahi-compat-libdnssd-dev \
+libpq-dev
 
 # NodeJS
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
@@ -79,7 +80,10 @@ cpanm HTML::Parse && \
 cpanm Data::Dumper && \
 cpanm MIME::Base64 && \
 cpanm Module::Pluggable && \
+cpanm Text::Diff && \
+cpanm DBD::Pg && \
 cpanm Net::SIP
+
 #cpanm WWW::Jawbone::Up
 
 # Speedtest tool
