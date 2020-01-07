@@ -1,92 +1,149 @@
-main:
-  restart: always
-  image: computerkoenig/fhem_main:v3.2
-  volumes:
-    - ./fhem_main/data:/opt/fhem
-    - ./fhem_main/log:/log
-    - "/etc/timezone:/etc/timezone:ro"
-    - "/etc/localtime:/etc/localtime:ro"
-  ports:
-     #- "8083:8083" #PC Web + Dashboard + Mobile
-     - "7072:7072" #FHEM2FHEM
-     - "3030:3030" #Firmata Server Port
-     - "8090:8090" #AMAD Port
-  links:
-     - mqtt
-     - collectord
+version: '2.1'
 
-mqtt:
-   restart: always
-   image: eclipse-mosquitto:latest
-   volumes:
-     - ./mqtt/config:/mqtt/config:ro
-     - ./mqtt/log:/mqtt/log
-     - ./mqtt/data:/mqtt/data
-     - "/etc/timezone:/etc/timezone:ro"
-     - "/etc/localtime:/etc/localtime:ro"
-   ports:
-     - "1883:1883"
-     #- "9001:9001" #Web Port
-
-collectord:
-  restart: always
-  image: computerkoenig/fhem_collectord:v1.8.1-r5
-  volumes:
-    - ./collectord/config:/etc/collectord:ro
-    - "/etc/timezone:/etc/timezone:ro"
-    - "/etc/localtime:/etc/localtime:ro"
-
-alexa:
-  restart: always
-  image: computerkoenig/fhem_alexa:v0.4.4-r5
-  volumes:
-    - ./alexa/data:/root/.alexa
-    - ./alexa/log:/log
-    - "/etc/timezone:/etc/timezone:ro"
-    - "/etc/localtime:/etc/localtime:ro"
-  ports:
-    - "3000:3000"
-  links:
-    - main
-
-tasmotaadmin:
-  restart: always
-  image: raymondmm/tasmoadmin:latest
-  volumes:
-    - ./tasmotaadmin/data:/data
-    - "/etc/timezone:/etc/timezone:ro"
-    - "/etc/localtime:/etc/localtime:ro"
-  ports:
-    - "8081:80"
-
-tasmocompiler:
-  restart: always
-  image: benzino77/tasmocompiler:latest
-  ports:
-    - "8082:3000"
-
-homebridge:
-  restart: always
-  image: computerkoenig/fhem_homebridge:v0.5
-  volumes:
-    - ./homebridge/config:/root/.homebridge
-    - /etc/timezone:/etc/timezone:ro
-    - /etc/localtime:/etc/localtime:ro
-  ports:
-          - "51826:51826"
-          - "8282:8282"
-  links:
-    - main
-
-ssl_proxy:
-  restart: always
-  image: computerkoenig/ssl_reverseproxy:v0.9
-  volumes:
-    - ./ssl_proxy/config:/etc/nginx/conf.d:ro
-    - ./ssl_proxy/certfiles:/certfiles:ro
-    - /etc/timezone:/etc/timezone:ro
-    - /etc/localtime:/etc/localtime:ro
-  ports:
-    - "8483:443"
-  links:
-    - main
+services:
+  main:
+    restart: always
+    image: computerkoenig/fhem_main:v3.3
+    volumes:
+      - ./fhem_main/data:/opt/fhem
+      - ./fhem_main/log:/log
+      - ./fhem_main/backup:/backup
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      - FHEM_PERM_DIR=0755
+      - FHEM_PERM_FILE=0644
+      - TZ=Europe/Berlin
+      - LOGFILE=/log/fhem-%Y-%m-%d.log
+      - CONFIGTYPE=configDB
+    ports:
+       #- "8083:8083" #PC Web + Dashboard + Mobile
+       - "7072:7072" #FHEM2FHEM
+       - "3030:3030" #Firmata Server Port
+       - "8090:8090" #AMAD Port
+    links:
+       - mqtt
+       - collectord
+       - fhemdblog
+       - fhemdbconf
+  
+  fhemdbconf:
+     restart: always
+     image: postgres
+     volumes:
+       - ./dbconf/data:/var/lib/postgresql/data
+     environment:
+       - "POSTGRES_DB=fhem_configDB"
+       - "POSTGRES_USER=fhem"
+     healthcheck:
+       test: ["CMD", "pg_isready", "-U", "postgres"]
+       interval: 30s
+       timeout: 10s
+       retries: 5
+  
+  fhemdblog:
+     restart: always
+     image: postgres
+     volumes:
+       - ./dblog/data:/var/lib/postgresql/data
+     environment:
+       - "POSTGRES_DB=fhem_log"
+       - "POSTGRES_USER=fhem"
+     healthcheck:
+       test: ["CMD", "pg_isready", "-U", "postgres"]
+       interval: 30s
+       timeout: 10s
+       retries: 5
+  
+  mqtt:
+     restart: always
+     image: eclipse-mosquitto:latest
+     volumes:
+       - ./mqtt/config:/mqtt/config:ro
+       - ./mqtt/log:/mqtt/log
+       - ./mqtt/data:/mqtt/data
+       - "/etc/timezone:/etc/timezone:ro"
+       - "/etc/localtime:/etc/localtime:ro"
+     ports:
+       - "1883:1883"
+       #- "9001:9001" #Web Port
+  
+  collectord:
+    restart: always
+    image: computerkoenig/fhem_collectord:v1.8.1-r5
+    volumes:
+      - ./collectord/config:/etc/collectord:ro
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+  
+  alexa:
+    restart: always
+    image: computerkoenig/fhem_alexa:v0.4.4-r5
+    volumes:
+      - ./alexa/data:/root/.alexa
+      - ./alexa/log:/log
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "3000:3000"
+    links:
+      - main
+  
+  tasmotaadmin:
+    restart: always
+    image: raymondmm/tasmoadmin:latest
+    volumes:
+      - ./tasmotaadmin/data:/data
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "8081:80"
+  
+  tasmocompiler:
+    restart: always
+    image: benzino77/tasmocompiler:latest
+    ports:
+      - "8082:3000"
+  
+  homebridge:
+    restart: always
+    image: computerkoenig/fhem_homebridge:v0.5
+    volumes:
+      - ./homebridge/config:/root/.homebridge
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+            - "51826:51826"
+            - "8282:8282"
+    links:
+      - main
+  
+  nginx_proxy:
+    restart: always
+    image: computerkoenig/ssl_reverseproxy:v1.0
+    volumes:
+      - ./nginx_ftui/config:/etc/nginx/conf.d:ro
+      - ./nginx_ftui/certfiles:/certfiles:ro
+      - ./fhem_main/data/www:/etc/nginx/html:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./nginx_ftui/log:/log
+    ports:
+      - "443:443"
+      - "80:80"
+      - "8083:8083"
+      - "8483:8483"
+    links:
+      - main
+  
+  pgadmin:
+    restart: always
+    image: dpage/pgadmin4
+    volumes:
+      - ./pgadmin/data:/var/lib/pgadmin
+    ports:
+      - "8000:80"
+    links:
+      - fhemdblog
+      - fhemdbconf
+  

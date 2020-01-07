@@ -66,6 +66,11 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     && tar -xvf node-v12.12.0-linux-armv7l.tar.xz \
     && cp -R node-v12.12.0-linux-armv7l/* /usr/local/ ; fi
 
+# Install Postgres 12 Client
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - \
+&& echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list \
+&& apt update && apt -y install postgresql-client
+
 #Install other FHEM Tools
 RUN apt-get -y install sendmail-bin etherwake python-pip && \
 cpan install App::cpanminus && \
@@ -81,8 +86,8 @@ cpanm Data::Dumper && \
 cpanm MIME::Base64 && \
 cpanm Module::Pluggable && \
 cpanm Text::Diff && \
-cpanm DBD::Pg && \
-cpanm Net::SIP
+cpanm DBD::Pg
+#cpanm Net::SIP
 
 #cpanm WWW::Jawbone::Up
 
