@@ -14,7 +14,7 @@ RUN mkdir -p /var/log/supervisor && \
 mkdir /etc/collectord
 
 RUN echo Europe/Berlin > /etc/timezone && dpkg-reconfigure tzdata
-COPY ./etc/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY /collectord/etc/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=3 CMD nc -z 127.0.0.1 5222 || exit 1
 
