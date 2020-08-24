@@ -1,6 +1,7 @@
 FROM nginx:stable
 MAINTAINER Michael Schäfer
 
+RUN usermod -u 1000 www-data
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl nginx-extras
 
 RUN mkdir -p /etc/ssl/nginx \
